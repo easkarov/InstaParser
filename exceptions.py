@@ -1,0 +1,2 @@
+class AttemptsLimitExceeded(Exception):
+    pass

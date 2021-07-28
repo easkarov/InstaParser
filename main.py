@@ -21,13 +21,14 @@ logger = app_logger.get_logger(__name__)
 class InstaParser:
     """Bot that collects Instagram posts"""
 
-    COOKIE_PATH = './cookies'
+    COOKIE_PATH = './cookies/cw.cookies'
 
     def __init__(self, username: str, password: str):
         self._username, self._password = username, password
         chrome_options = ChromeOptions()
         self.disable_webdriver_mode(chrome_options)
         self.set_user_agent(chrome_options, USER_AGENT)
+        chrome_options.add_argument('--headless')
         self._browser = Chrome(options=chrome_options)
 
     def login(self):
@@ -81,7 +82,8 @@ class InstaParser:
         return posts_urls[num_of_top_posts:]
 
     def filter_short_posts(self, urls: List[str], min_symbols: int = 100) -> Tuple[List[str], List[str]]:
-        """This method filters out short posts, whose length is less than a certain number (min_symbols)"""
+        """This method filters out short posts, whose length is
+        less than a certain number (min_symbols)"""
 
         long_posts_urls = []
         long_posts_text = []
@@ -115,7 +117,8 @@ class InstaParser:
 
         posts_urls = self.search_posts_by_hashtag(hashtag, n=num_of_posts)
         logger.info(f'собрано всего ссылок на посты: {len(posts_urls)}')
-        filtered_post_urls, filtered_post_text = self.filter_short_posts(posts_urls)
+        filtered_post_urls, filtered_post_text = self.filter_short_posts(posts_urls,
+                                                                         min_symbols=1200)
         logger.info(f'посты отфильтрованы. Кол-во длинных постов: {len(filtered_post_urls)}')
 
         return filtered_post_urls, filtered_post_text
@@ -196,9 +199,9 @@ class InstaParser:
     def run(cls, hashtag):
         examp = cls(username=LOGIN, password=PASSWORD)
         examp.login()
-        post_urls, post_text = examp.get_long_posts_by_hashtag(hashtag, num_of_posts=10)
+        post_urls, post_text = examp.get_long_posts_by_hashtag(hashtag, num_of_posts=500)
         filename = 'tag_' + hashtag + '.txt'
-        path = f'./posts/{hashtag}/'
+        path = f'Posts/{hashtag}/'
 
         if not os.path.exists(path):
             os.mkdir(path)
@@ -229,9 +232,9 @@ def main():
     #         logger.info('куки успешно загрузились')
     # else:
 
-    hashtags = ['полезныесоветы']
+    hashtags = ['полезныесоветы', 'ремонт', 'строительство']
 
-    pool = ThreadPool(processes=1)
+    pool = ThreadPool(processes=3)
     pool.map(InstaParser.run, hashtags)
     # links = parser.get_long_posts_by_hashtag(hashtag, num_of_posts=50)
     # filename = 'tag_' + hashtag + '.txt'

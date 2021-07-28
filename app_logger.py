@@ -1,7 +1,8 @@
 # app_logger.py
 import logging
 
-_log_format = f"%(asctime)s - [%(levelname)s] - (%(filename)s) - (%(lineno)d) - %(message)s"
+_log_format = f"%(asctime)s - [%(levelname)s] - (%(filename)s) - (%(lineno)d)" \
+              f" - %(message)s - %(threadName)s"
 
 
 def get_file_handler():
